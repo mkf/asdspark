@@ -75,41 +75,8 @@ procedure Asdanag is
    InputTooLarge : exception;
 
    procedure scans (w : two_t) is
-      fin : Boolean := False;
-      i   : index_t := 1;
    begin
-      charseq:
-      loop
-         if i = index_t'Last then
-            raise InputTooLarge with Standard.String(s(w));
-         end if;
-         declare
-            c : Character;
-         begin
-            if i = 1 then
-               loop
-                  Ada.Text_IO.Get_Immediate(c);
-                  exit when c /= Ada.Characters.Latin_1.LF;
-               end loop;
-            end if;
-            fin := fin or (c = Ada.Characters.Latin_1.LF);
-            exit charseq when fin;
-            s (w) (i) := c;
-            i         := i + 1;
-         exception
-            when Ada.Text_IO.End_Error =>
-               if i = 1 then
-                  raise;
-               else
-                  fin := True;
-               end if;
-         end;
-         exit when fin;
-      end loop charseq;
-      returning :
-      begin
-         lens (w) := i - 1;
-      end returning;
+      Ada.Text_IO.Get_Line(String(s(w)), Integer(lens(w)));
    end scans;
 
 begin
