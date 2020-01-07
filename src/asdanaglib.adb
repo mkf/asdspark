@@ -121,6 +121,7 @@ is
    begin
       if ending /= index_t'First then
          furPar := furthestParent (ending);
+         assume_word_lowerenglish(s, ending);
          for i in reverse parent_t'First .. furPar loop
             siftDown (s, ending, i);
          end loop;
