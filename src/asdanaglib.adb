@@ -91,7 +91,7 @@ is
                j := i + 1;
             end if;
             if j = t then
-               t := ending;
+               t := ending; -- should be ghost code
                exit theLoop;
             end if;
             swap (s, t, j);
