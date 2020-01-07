@@ -13,11 +13,6 @@ is
 
    FirstChild : constant index_t := index_t'First + 1;
 
-   FurthestParentStatic : constant index_t :=
-     index_t'Last / 2 + ((index_t'Last rem 2) + index_t'First - 1) / 2;
-
-   subtype parent_t is index_t range (index_t'First) .. FurthestParentStatic;
-
    function furthestParent (ending : in index_t) return parent_t is
    begin
       return Integer (ending / 2) +
@@ -29,6 +24,52 @@ is
       return 2 * parent + 1 - index_t'First;
    end leftChild;
 
+   function heap_property (s : in wordstore; ending, f : in index_t)
+     return Boolean
+   is
+      t : index_t := f;
+      i : index_t;
+      furPar : parent_t;
+   begin
+      if ending /= f then
+         furPar := furthestParent(ending);
+         while t <= furPar loop
+            i := leftChild (t);
+            if s(t) < s(i) then
+               return False;
+            end if;
+            if i < ending and then s (t) < s (i + 1) then
+               return False;
+            end if;
+            t := index_t'Succ(t);
+         end loop;
+         return True;
+      else
+         return True;
+      end if;
+   end heap_property;
+
+   function children_valid_heaps (s : in wordstore; ending, f : in index_t)
+                                  return Boolean
+   is
+      i : index_t;
+      furPar : parent_t;
+   begin
+      if ending /= f then
+         furPar := furthestParent(ending);
+         if f <= furPar then
+            i := leftChild(f);
+            if not heap_property(s, ending, i) then
+               return False;
+            end if;
+            if i < ending then
+               return heap_property(s, ending, index_t'Succ(i));
+            end if;
+         end if;
+      end if;
+      return True;
+   end children_valid_heaps;
+
    procedure siftDown (s : in out wordstore; ending, f : in index_t) is
       t      : index_t := f;
       i      : index_t;
@@ -37,20 +78,25 @@ is
    begin
       if ending /= f then
          furPar := furthestParent (ending);
+         theLoop:
          while t <= furPar loop
             pragma Loop_Variant (Increases => t);
+            pragma Loop_Invariant (children_valid_heaps(s, ending, t));
             i := leftChild (t);
             j := t;
             if s (j) < s (i) then
                j := i;
             end if;
-            if i /= index_t'Last and then s (j) < s (i + 1) then
+            if i < ending and then s (j) < s (i + 1) then
                j := i + 1;
             end if;
-            exit when j = t;
+            if j = t then
+               t := ending;
+               exit theLoop;
+            end if;
             swap (s, t, j);
             t := j;
-         end loop;
+         end loop theLoop;
       end if;
    end siftDown;
 
@@ -68,13 +114,15 @@ is
    procedure sort (s : in out wordstore; ending : in index_t) is
       heapEnding : index_t := ending;
    begin
-      heapify (s, ending);
-      heapEnding := heapEnding - 1;
-      while heapEnding > index_t'First loop
-         swap (s, heapEnding, index_t'First);
+      if ending /= index_t'First then
+         heapify (s, ending);
          heapEnding := heapEnding - 1;
-         siftDown (s, heapEnding, index_t'First);
-      end loop;
+         while heapEnding > index_t'First loop
+            swap (s, heapEnding, index_t'First);
+            heapEnding := heapEnding - 1;
+            siftDown (s, heapEnding, index_t'First);
+         end loop;
+      end if;
    end sort;
 
    procedure anag (s : in out s_t; lens : in lens_t; result : out Boolean)
@@ -87,7 +135,6 @@ is
       if lens (1) /= index_t'First then
          for i in two_t loop
             sort (s (i), lens (i));
-            -- Ada.Text_IO.Put_Line(String(s(i))(index_t'First..lens(i)));
          end loop;
       end if;
       for c in index_t'First .. (lens (1)) loop
