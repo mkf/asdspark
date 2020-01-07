@@ -4,6 +4,19 @@ with Ada.Integer_Text_IO;
 package body AsdanagLib with
    SPARK_Mode
 is
+
+   procedure assume_char_lowerenglish (a : char) is
+   begin
+      pragma Assume (a in 'a'..'z');
+   end;
+
+   procedure assume_word_lowerenglish (s : wordstore; ending : index_t) is
+   begin
+      for i in index_t'First .. ending loop
+         assume_char_lowerenglish(s(i));
+      end loop;
+   end assume_word_lowerenglish;
+
    procedure swap (s : in out wordstore; f, t : index_t) is
       tcc : char := s (t);
    begin
@@ -56,9 +69,11 @@ is
       furPar : parent_t;
    begin
       if ending /= f then
+         pragma Assert (f < ending);
          furPar := furthestParent(ending);
          if f <= furPar then
             i := leftChild(f);
+            pragma Assert (i <= ending);
             if not heap_property(s, ending, i) then
                return False;
             end if;
@@ -82,6 +97,7 @@ is
          while t <= furPar loop
             pragma Loop_Variant (Increases => t);
             pragma Loop_Invariant (children_valid_heaps(s, ending, t));
+            assume_word_lowerenglish(s, ending);
             i := leftChild (t);
             j := t;
             if s (j) < s (i) then

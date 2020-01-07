@@ -5,8 +5,13 @@ package AsdanagLib with
 SPARK_Mode
 is
    subtype char is Character;
+   procedure assume_char_lowerenglish (a : char) with
+     Ghost, Global => null, Post => a in 'a'..'z';
    subtype index_t is Positive range 1 .. 10000;
    type wordstore is array (index_t) of char;
+   procedure assume_word_lowerenglish (s : wordstore; ending : index_t) with
+     Ghost, Global => null,
+     Post => (for all I in index_t'First .. ending => s(I) in 'a' .. 'z');
    subtype two_t is Integer range 1 .. 2;
    type s_t is array (two_t) of wordstore;
    type lens_t is array (two_t) of index_t;
