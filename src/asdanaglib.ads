@@ -25,7 +25,8 @@ is
      Pre => (for all W in two_t'Range =>
                (for all I in index_t'First .. lens(W) =>
                     s(W)(I) in 'a'..'z'));
-   procedure swap (s : in out wordstore; f, t : index_t);
+   procedure swap (s : in out wordstore; f, t : index_t) with
+     Post => s(t) = s(f)'Old and s(f) = s(t)'Old;
    FurthestParentStatic : constant index_t :=
      index_t'Last / 2 + ((index_t'Last rem 2) + index_t'First - 1) / 2;
    subtype parent_t is index_t range (index_t'First) .. FurthestParentStatic;
