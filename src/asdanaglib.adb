@@ -121,9 +121,10 @@ is
    begin
       if ending /= index_t'First then
          furPar := furthestParent (ending);
-         assume_word_lowerenglish(s, ending);
          for i in reverse parent_t'First .. furPar loop
+            assume_word_lowerenglish(s, ending);
             siftDown (s, ending, i);
+            assume_word_lowerenglish(s, ending);
          end loop;
       end if;
    end heapify;
@@ -138,6 +139,7 @@ is
             swap (s, heapEnding, index_t'First);
             heapEnding := heapEnding - 1;
             siftDown (s, heapEnding, index_t'First);
+            assume_word_lowerenglish(s, ending);
          end loop;
       end if;
    end sort;
