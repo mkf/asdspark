@@ -26,8 +26,10 @@ is
    subtype parent_t is index_t range (index_t'First) .. FurthestParentStatic;
    function furthestParent (ending : in index_t) return parent_t with
      Pre => ending /= index_t'First,
-     Post => furthestParent'Result <= ending;
-   function leftChild (parent : in parent_t) return index_t;
+     Post => furthestParent'Result < ending and
+       leftChild(furthestParent'Result) <= ending;
+   function leftChild (parent : in parent_t) return index_t with
+     Post => leftChild'Result > parent;
    procedure siftDown (s : in out wordstore; ending, f : in index_t) with
      Pre => f <= ending and children_valid_heaps(s, ending, f),
      Post => heap_property(s, ending, f);
