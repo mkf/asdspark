@@ -12,6 +12,20 @@ is
       c : slrarr := (null, null);
    end record;
 
+   function naive_result (A : arr) return Natural
+   is
+      t : Natural := 0;
+   begin
+      for i in A'Range loop
+         for j in A'Range loop
+            if i<j and A(i)>A(j) then
+               t := t + 1;
+            end if;
+         end loop;
+      end loop;
+      return t;
+   end naive_result;
+
    function result (A : arr) return Natural
    is
       t : Natural := 0;
