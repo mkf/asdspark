@@ -1,17 +1,6 @@
 package body AsdinveLib with
    SPARK_Mode
 is
-   subtype w_t is Positive;
-   type LR is (Left, Right);
-
-   type s;
-   type slrarr is array (LR) of access s;
-   type s is record
-      w : w_t;
-      t : Natural := 0;
-      c : slrarr := (null, null);
-   end record;
-
    function naive_result (A : arr) return Natural
    is
       t : Natural := 0;
@@ -26,36 +15,50 @@ is
       return t;
    end naive_result;
 
-   function result (A : arr) return Natural
+   procedure insert_next(A : arr; S : in out sarr;
+                         root, now : Positive;
+                         t : out Natural)
    is
-      t : Natural := 0;
-      r : access s := null;
-      p, q : access s;
+      tt : Natural := 0;
       c : LR;
    begin
-      for u in A'Range loop
-         p := new s'(w => A(u), t => 0, c => (null, null));
-         if r = null then
-            r := p;
-         else
-            q := r;
-            loop
-               if p.w < q.w then
-                  t := t + 1 + q.t;
-                  c := Left;
-               else
-                  q.t := q.t + 1;
-                  c := Right;
-               end if;
-               if q.c(c) /= null then
-                  q := q.c(c);
-               else
-                  q.c(c) := p;
-                  exit;
-               end if;
-            end loop;
-         end if;
-      end loop;
+      if A(now) < A(root) then
+         tt := 1 + S(root).t;
+         c := Left;
+      else
+         S(root).t := S(root).t + 1;
+         c := Right;
+      end if;
+      if S(root).c(c) /= 0 then
+         declare
+            pt : Natural;
+         begin
+            insert_next(A, S, S(root).c(c), now, pt);
+            t := tt + pt;
+         end;
+      else
+         S(root).c(c) := now;
+         t := tt;
+      end if;
+   end insert_next;
+
+   procedure trec_result (A : arr; S : in out sarr;
+                          r : Positive; t : out Natural)
+   is
+      tt, pt : Natural;
+   begin
+      insert_next(A, S, A'First, r, tt);
+      trec_result(A, S, r+1, pt);
+      tt := tt + pt;
+      t := tt;
+   end trec_result;
+
+   function result (A : arr) return Natural
+   is
+      r : sarr (A'Range) := (others => s'(t => 0, c => (0, 0)));
+      t : Natural;
+   begin
+      trec_result(A, r, A'First, t);
       return t;
    end result;
 
